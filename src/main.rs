@@ -66,7 +66,7 @@ fn send_message(request_body: &Value, text: &str) {
 
         
 
-        match minreq::post(format!("http://api.telegram.org/bot{}/sendMessage", API_TOKEN))
+        match minreq::post(format!("http://api.telegram.org/bot{:?}/sendMessage", std::env::var("API_TOKEN")))
             .with_header("Content-Type", "application/json")
             .with_body(telegram_message.to_string())
             .send()
