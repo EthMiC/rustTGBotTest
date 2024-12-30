@@ -1,0 +1,11 @@
+[package]
+name = "rustTGBot"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+env-file-reader = "0.3.0"
+minreq = { version = "2.13.0", features = ["https"] }
+serde = "1.0.217"
+serde_json = "1.0.134"
+tiny_http = "0.12.0"
