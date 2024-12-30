@@ -2,10 +2,8 @@ use std::str;
 use serde_json::{json, Value};
 use tiny_http::Response;
 
-const PATH: &'static str = env!("PATH");
-
 fn main() {
-    let server = tiny_http::Server::http(format!("0.0.0.0:{}", PATH)).unwrap();
+    let server = tiny_http::Server::http("0.0.0.0:10000").unwrap();
     loop {
         let mut request = match server.recv() {
             Ok(rq) => rq,
