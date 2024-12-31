@@ -1,12 +1,12 @@
 use std::str;
-use std::error::Error;
 use serde_json::{json, Value};
 use tiny_http::Response;
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main(){
     // Load environment variables from .env file.
     // Fails if .env file not found, not readable or invalid.
-    let _ = dotenvy::dotenv()?;
+    dotenvy::dotenv().unwrap_or_default();
+
     let server = tiny_http::Server::http("0.0.0.0:10000").unwrap();
     loop {
         let mut request = match server.recv() {
@@ -53,9 +53,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     None => "message not recieved",
             }
         )
-    };
-
-    Ok(())
+    }
 }
 
 fn send_message(request_body: &Value, text: &str) {
