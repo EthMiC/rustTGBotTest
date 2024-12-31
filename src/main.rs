@@ -1,8 +1,12 @@
 use std::str;
+use std::error::Error;
 use serde_json::{json, Value};
 use tiny_http::Response;
 
-fn main() {
+fn main() -> Result<(), Box<dyn Error>> {
+    // Load environment variables from .env file.
+    // Fails if .env file not found, not readable or invalid.
+    let _ = dotenvy::dotenv()?;
     let server = tiny_http::Server::http("0.0.0.0:10000").unwrap();
     loop {
         let mut request = match server.recv() {
@@ -49,7 +53,9 @@ fn main() {
                     None => "message not recieved",
             }
         )
-    }
+    };
+
+    Ok(())
 }
 
 fn send_message(request_body: &Value, text: &str) {
@@ -64,9 +70,7 @@ fn send_message(request_body: &Value, text: &str) {
             "parse_mode": "Markdown"
         });
 
-        
-
-        match minreq::post(format!("http://api.telegram.org/bot{:?}/sendMessage", std::env::var("API_TOKEN")))
+        match minreq::post(format!("http://api.telegram.org/bot{}/sendMessage", std::env::var("API_TOKEN").expect("API Key")))
             .with_header("Content-Type", "application/json")
             .with_body(telegram_message.to_string())
             .send()
@@ -78,13 +82,14 @@ fn send_message(request_body: &Value, text: &str) {
                     .and_then(|f| f.get("username"))
                     .and_then(|username| username.as_str())
                     .unwrap(),
-                serde_json::from_str::<Value>(response.as_str().unwrap())
+                match serde_json::from_str::<Value>(response.as_str().unwrap())
                     .unwrap()
                     .get("result")
                     .and_then(|r| r.get("text"))
-                    .unwrap()
-                    .as_str()
-                    .unwrap()
+                    .and_then(|text| text.as_str()) {
+                        Some(text) => text,
+                        None => "failed"
+                    }
             ),
             Err(e) => eprintln!("Error sending Telegram message: {}", e),
         }
